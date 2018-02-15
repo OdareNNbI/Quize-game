@@ -23,8 +23,7 @@ public class Game : MonoBehaviour {
     private GameObject losePanel;
     [SerializeField]
     private Text scoreInLOsePanel;
-
-    private List<string> words;
+    
     private int countTrying;
 
     public static int MaxCountTrying { get; set; }
@@ -58,26 +57,12 @@ public class Game : MonoBehaviour {
             scoreText.text = "Score: 0";
             countTryingText.text = "Count trying: " + countTrying.ToString();
             Instance = this;
-            words = text.words;
-            WordInGame.Instance.CreateWord(GenerateWord(ref words));
+            NewWord();
         }
     }
     
 
-    string GenerateWord(ref List<string> words)
-    {   
-        if(words.Count == 0)
-        {
-            Win();
-            return null;
-        }
 
-        int number = Random.Range(0, words.Count);
-        string word = words[number];
-        print(word);
-        words.RemoveAt(number);
-        return word;
-    }
 
     public void AddScore()
     {
@@ -85,7 +70,7 @@ public class Game : MonoBehaviour {
         countTrying = MaxCountTrying;
         onEnable();
         scoreText.text ="Score: " + Score.ToString();
-        WordInGame.Instance.CreateWord(GenerateWord(ref words));
+        NewWord();
     }
 
     public void Lose()
@@ -103,5 +88,10 @@ public class Game : MonoBehaviour {
     public void onMenu()
     {
         SceneManager.LoadScene("Menu");
+    }
+
+    void NewWord()
+    {
+        WordInGame.Instance.CreateWord(text.ChooseWord());
     }
 }

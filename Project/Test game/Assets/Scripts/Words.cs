@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "Settings" ,menuName = "Words")]
-public class Words : ScriptableObject {
+[CreateAssetMenu(fileName = "Settings", menuName = "Words")]
+public class Words : ScriptableObject
+{
 
     [SerializeField]
     [Header("It's text for worlds")]
@@ -16,24 +17,23 @@ public class Words : ScriptableObject {
     [Header("Count of your trying")]
     private int countTrying;
     [SerializeField]
-    [Header("Use common word")]
-    private  bool useFewWord;
+    [Header("Use not rare word")]
+    private bool useFewWord;
     [SerializeField]
     [Header("Use rare word")]
     private bool useLotWord;
 
-    public List<string> words { get; set; }
-    
+    private List<QuantityPerUnit> wordOnRare; //слова по встречаемости
+
     public void CreateList()
     {
-        words = WordsFromText(text.text).Where(x => x.Length >= minLength).ToList();
+        wordOnRare = new List<QuantityPerUnit>();
+        WordsFromText(text.text);
         Game.MaxCountTrying = countTrying;
     }
 
-    List<string> WordsFromText(string text)
+    void WordsFromText(string text)
     {
-        List<string> words = new List<string>();
-
         for (int i = 0; i < text.Length; i++)
         {
             while (i < text.Length && !char.IsLetter(text[i]))
@@ -49,10 +49,75 @@ public class Words : ScriptableObject {
                 i++;
             }
 
-            if (word.Length != 0)
-                words.Add(new string(word).ToUpper());
+            if (word.Length != 0 && word.Length >= minLength)
+            {
+                string val = new string(word).ToUpper();
+                bool check = false;
+                for (int j = 0; j < wordOnRare.Count; j++)
+                {
+                    if (wordOnRare[j].Word == val)
+                    {
+                        wordOnRare[j].Quantity++;
+                        check = true;
+                        break;
+                    }
+                }
+                if (!check) wordOnRare.Add(new QuantityPerUnit(val));
+            }
         }
 
-        return words;
+        wordOnRare = wordOnRare.OrderBy(x => x.Quantity).ToList();
+
+    }
+
+
+    public string ChooseWord()
+    {
+        if (wordOnRare.Count() == 0)
+        {
+            Game.Instance.Win();
+            return null;
+        }
+
+        string word = "";
+
+        int number;
+
+        if (useFewWord)
+        {
+            number = Random.Range(wordOnRare.Count() - 3, wordOnRare.Count());
+            if (number < 0) number = 0;
+        }
+        else if (useLotWord)
+        {
+            number = Random.Range(0, 3);
+            if (number >= wordOnRare.Count()) number = wordOnRare.Count() - 1;
+
+        }
+        else
+            number = Random.Range(0, wordOnRare.Count());
+
+
+        word = wordOnRare[number].Word;
+        Debug.Log(wordOnRare[number].Word + "  Количество в тексте: " + wordOnRare[number].Quantity);
+        wordOnRare[number].Quantity--;
+        if (wordOnRare[number].Quantity <= 0)
+            wordOnRare.RemoveAt(number);
+
+        return word;
+    }
+
+}
+
+[System.Serializable]
+public class QuantityPerUnit
+{
+    public string Word { get; set; }
+    public int Quantity { get; set; }//Частота встречаемости
+
+    public QuantityPerUnit(string Word)
+    {
+        this.Word = Word;
+        Quantity = 1;
     }
 }

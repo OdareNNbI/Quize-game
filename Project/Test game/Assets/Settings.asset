@@ -13,4 +13,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: {fileID: 4900000, guid: c9f553b1e2863844290183c71102415b, type: 3}
   minLength: 1
-  countTrying: 10
+  countTrying: 5
+  useFewWord: 0
+  useLotWord: 0

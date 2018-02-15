@@ -16,7 +16,8 @@ public class WordInGame : MonoBehaviour {
     public static WordInGame Instance { get; set; }
     
 
-    void Start() {
+    void Awake() {
+
         if (Instance == null)
         {
             Instance = this;

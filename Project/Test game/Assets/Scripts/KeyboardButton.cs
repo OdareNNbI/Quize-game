@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class KeyboardButton : MonoBehaviour
 {
 
-    private static int count = 0;
+    public static int count { get; set; }
 
     private char letter;
 
